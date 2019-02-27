@@ -1,4 +1,5 @@
 import pandas as pd
+import re
 
 
 def find_word(sstr, wword):
@@ -24,27 +25,55 @@ def words_rule(wordss, dfcol):
     return 1
 
 
+def new_find_word(wword):
+    if '_' in wword:
+        return wword[1:]
+    else:
+        return wword
+
+
+def new_words_rule(txt, kword):
+    if ('-' in kword) and ('_' in kword):  # '_不-好'
+        re_pattern = '.*'.join([new_find_word(i) for i in kword.split('-')])
+        re_result = re.search(re_pattern, txt)
+        if re_result:
+            return 0
+
+        re_pattern = '.*'.join([i for i in kword.split('-') if '_' not in i])
+        re_result = re.search(re_pattern, txt)
+        if re_result:
+            return 1
+
+        return 0
+
+    elif ('-' in kword) and ('_' not in kword):  # '不-好'
+        re_pattern = '.*'.join([i for i in kword.split('-')])
+        re_result = re.search(re_pattern, txt)
+        if re_result:
+            return 1
+        else:
+            return 0
+
+    elif ('-' not in kword) and ('_' not in kword):  # '不好'
+        re_result = re.search(kword, txt)
+        if re_result:
+            return 1
+        else:
+            return 0
+
+    elif ('-' not in kword) and ('_' in kword):
+        raise TypeError('单独_模式不可用')
+
+
 def keyword_columns(df, dfcol):
     if dfcol in df.columns:
         return df
     else:
         count_num = len(df)
-        series_col = df[df.columns[0]].map(lambda x: words_rule(x, dfcol))
+        series_col = df[df.columns[0]].map(lambda x: new_words_rule(x, dfcol))
         df[dfcol] = series_col
         return df
 
 
 if __name__ == '__main__':
-    pinglun = pd.read_csv('zhengwen.csv')
-
-    keywords = ['你', '好不好', '才没有', '人才-引进', '第-二', '券-牛奶', '盒-三']
-
-    print(pinglun)
-    for i in keywords:
-        kdf = keyword_columns(pinglun, i)
-
-    print(pinglun)
-
-    # print(kdf.loc[kdf['盒-三']==1])
-    print(kdf)
-    print(kdf[kdf.columns[1:]].sum(axis=0))
+    print(new_words_rule('我是好人','_好-人'))
