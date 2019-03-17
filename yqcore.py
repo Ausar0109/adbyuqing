@@ -65,7 +65,8 @@ def new_words_rule(txt, kword):
         raise TypeError('单独_模式不可用')
 
 
-def keyword_columns(df, dfcol):
+def keyword_columns(df2, dfcol):
+    df = df2.copy()
     if dfcol in df.columns:
         return df
     else:
@@ -75,5 +76,53 @@ def keyword_columns(df, dfcol):
         return df
 
 
+def readfile(*args, **kwargs):
+    if 'csv' in args[0]:
+        try:
+            df = pd.read_csv(*args, **kwargs)
+            return df
+        except:
+            pass
+
+    if 'csv' in args[0]:
+        try:
+            df = pd.read_csv(*args, **kwargs, encoding='gb18030')
+            return df
+        except:
+            pass
+
+    if 'txt' in args[0]:
+        try:
+            df = pd.read_csv(*args, **kwargs)
+            return df
+        except:
+            pass
+
+    if 'txt' in args[0]:
+        try:
+            df = pd.read_csv(*args, **kwargs, encoding='gb18030')
+            return df
+        except:
+            print('pd.read_csv无法读取该文件')
+
+    if 'csv' not in args[0]:
+        try:
+            df = pd.read_excel(*args, **kwargs)
+            return df
+        except:
+            pass
+
+    if 'csv' not in args[0]:
+        try:
+            df = pd.read_excel(*args, **kwargs, encoding='gb18030')
+            return df
+        except:
+            pass
+
+    raise TypeError
+
+
+
+
 if __name__ == '__main__':
-    print(new_words_rule('我是好人','_好-人'))
+    print(new_words_rule('美白', '_美白-_完美-美-_美白-_完美'))
